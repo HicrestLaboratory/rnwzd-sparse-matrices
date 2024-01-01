@@ -7,6 +7,12 @@
 #include <utility>
 #include <numeric>
 #include <array>
+
+// inline ???
+double relu(double x)
+{
+    return (x > 0) ? x : 0;
+}
 class Matrix
 {
 public:
@@ -24,7 +30,7 @@ public:
     MatrixD(size_t m, size_t n, double value = 0) : m{m}, n{n}
     {
         data.resize(m * n);
-        std::fill_n(data.begin(), m * n, value);
+        std::fill(data.begin(), data.end(), value);
     }
 
     // TODO rvalue constructor
@@ -126,7 +132,14 @@ public:
         }
         return C;
     }
-
+    friend MatrixD relu(const MatrixD &A)
+    {
+        MatrixD C{A.m, A.n};
+        std::transform(
+            A.data.begin(), A.data.end(), C.data.begin(), [](const auto &e)
+            { return relu(e); });
+        return C;
+    }
     friend std::ostream &operator<<(std::ostream &out, const MatrixD &matrix)
     {
         for (int x = 0; x < matrix.m; x++)
@@ -279,7 +292,19 @@ public:
         return A * (1 / value);
     }
     friend MatrixCOO operator*(const MatrixCOO &A, const MatrixD &B)
-    { 
+    {
+        assert(A.n == B.m);
+        MatrixCOO C{A.m, B.n};
+        std::for_each(A.data.begin(), A.data.end(), [&B, &C](const auto &e)
+                      {
+            auto [i,j] {e.first};
+            auto A_ij { e.second};
+            for (size_t k {0}; k < B.n; ++k)
+                 C(i,k) += A_ij * B(j,k); });
+        return C;
+    }
+    friend MatrixCOO operator*(const MatrixCOO &A, const MatrixCOO &B)
+    {
         assert(A.n == B.m);
         MatrixCOO C{A.m, B.n};
         std::for_each(A.data.begin(), A.data.end(), [&B, &C](const auto &e)
@@ -290,16 +315,14 @@ public:
                  C(i,k) += A_ij * B(j,k); });
         return C;
     }
-    friend MatrixCOO operator*(const MatrixCOO &A, const MatrixCOO &B)
-    { 
-        assert(A.n == B.m);
-        MatrixCOO C{A.m, B.n};
-        std::for_each(A.data.begin(), A.data.end(), [&B, &C](const auto &e)
+    friend MatrixCOO relu(const MatrixCOO &A)
+    {
+        MatrixCOO C{A.m, A.n};
+        std::for_each(A.data.begin(), A.data.end(), [&C](const auto &e)
                       {
             auto [i,j] {e.first};
             auto A_ij { e.second};
-            for (int k = 0; k < B.n; ++k)
-                 C(i,k) += A_ij * B(j,k); });
+                 C(i,j) = relu(A_ij); });
         return C;
     }
     friend std::ostream &operator<<(std::ostream &out, const MatrixCOO &matrix)
@@ -326,9 +349,10 @@ int main()
     MatrixCOO m(2, 3);
     m(0, 0) = 1;
     m(0, 1) = 1;
-    m(1, 1) = 2;
+    m(1, 1) = -2;
     std::cout << M << std::endl;
     std::cout << m << std::endl;
+    std::cout << relu(m) << std::endl;
     std::cout << m * M << std::endl;
     return 0;
 }
