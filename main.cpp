@@ -7,6 +7,7 @@
 #include <utility>
 #include <numeric>
 #include <array>
+#include <random>
 
 // inline ???
 double relu(double x)
@@ -32,7 +33,17 @@ public:
         data.resize(m * n);
         std::fill(data.begin(), data.end(), value);
     }
-
+    MatrixD(size_t m, size_t n, std::function<double(size_t, size_t)> generator) : m{m}, n{n}
+    { // TODO std generate parallel
+        data.resize(m * n);
+        for (size_t i{}; i < m; ++i)
+        {
+            for (size_t j{}; j < n; ++j)
+            {
+                data[i * n + j] = generator(i, j);
+            }
+        }
+    }
     // TODO rvalue constructor
     ~MatrixD()
     {
@@ -344,6 +355,15 @@ public:
 
 int main()
 {
+    std::random_device seed;
+    std::mt19937 generator(seed());
+    std::uniform_real_distribution UniRe(-0.5, 0.5);
+    MatrixD A{2, 2, [&](auto i, auto j)
+              { return UniRe(generator); }};
+
+    std::cout << A << std::endl;
+    std::cout << relu(A) << std::endl;
+
     MatrixD M(3, 2, 1);
 
     MatrixCOO m(2, 3);
@@ -352,7 +372,8 @@ int main()
     m(1, 1) = -2;
     std::cout << M << std::endl;
     std::cout << m << std::endl;
-    std::cout << relu(m) << std::endl;
     std::cout << m * M << std::endl;
+    relu(M);
+
     return 0;
 }
