@@ -181,7 +181,21 @@ public:
     // {
     //     std::copy(A.data.begin(),A.data.end(),data.begin() );
     // }
-
+    MatrixCOO(size_t m, size_t n, std::function<double(size_t, size_t)> generator) : m{m}, n{n}
+    { // TODO std generate parallel
+        double A_ij;
+        for (size_t i{}; i < m; ++i)
+        {
+            for (size_t j{}; j < n; ++j)
+            {
+                A_ij = generator(i, j);
+                if (A_ij != 0.0)
+                {
+                    data[{i, j}] = A_ij;
+                }
+            }
+        }
+    }
     // TODO rvalue constructor
     ~MatrixCOO()
     {
