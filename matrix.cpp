@@ -12,7 +12,7 @@ double relu(double x)
 
 /////////////////////////////////
 
-MatrixD::MatrixD(size_t m, size_t n, double value = 0) : m{m}, n{n}
+MatrixD::MatrixD(size_t m, size_t n, double value) : m{m}, n{n}
 {
     data.resize(m * n);
     std::fill(data.begin(), data.end(), value);
@@ -206,7 +206,7 @@ double MatrixCOO::operator()(size_t row, size_t col) const
     {
         value = data.at({row, col});
     }
-    catch (std::out_of_range oor)
+    catch (const std::out_of_range &e)
     {
     }
     return value;
@@ -228,7 +228,7 @@ double MatrixCOO::operator[](size_t index) const
     {
         value = data.at({row, col});
     }
-    catch (std::out_of_range oor)
+    catch (const std::out_of_range &e)
     {
     }
     return value;

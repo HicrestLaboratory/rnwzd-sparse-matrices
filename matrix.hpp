@@ -25,7 +25,7 @@ public:
     // TODO public?
     size_t m, n;
 
-    MatrixD(size_t m, size_t n, double value);
+    MatrixD(size_t m, size_t n, double value = 0);
     MatrixD(size_t m, size_t n, std::function<double(size_t, size_t)> generator);
     MatrixD(const MatrixCOO &A);
     // TODO rvalue constructor
