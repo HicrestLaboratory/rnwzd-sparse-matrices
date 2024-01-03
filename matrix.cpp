@@ -136,14 +136,6 @@ MatrixD operator*(const MatrixD &A, const MatrixD &B)
     }
     return C;
 }
-MatrixD relu(const MatrixD &A)
-{
-    MatrixD C{A.m, A.n};
-    std::transform(
-        A.data.begin(), A.data.end(), C.data.begin(), [](const auto &e)
-        { return relu(e); });
-    return C;
-}
 std::ostream &operator<<(std::ostream &out, const MatrixD &matrix)
 {
     for (int x = 0; x < matrix.m; x++)
@@ -156,7 +148,38 @@ std::ostream &operator<<(std::ostream &out, const MatrixD &matrix)
     };
     return out;
 }
-
+MatrixD relu(const MatrixD &A)
+{
+    MatrixD C{A.m, A.n};
+    std::transform(
+        A.data.begin(), A.data.end(), C.data.begin(), [](const auto &e)
+        { return relu(e); });
+    return C;
+}
+double MatrixD::outdegree(size_t v)
+{
+    // TODO unweighted ??
+    // TODO std algorithm
+    double sum{0};
+    auto i{v};
+    for (size_t j{}; j < n; ++j)
+    {
+        sum += data[i * n + j];
+    }
+    return sum;
+}
+double MatrixD::indegree(size_t v)
+{
+    // TODO unweighted ??
+    // TODO std algorithm
+    double sum{0};
+    auto j{v};
+    for (size_t i{}; i < m; ++i)
+    {
+        sum += data[i * n + j];
+    }
+    return sum;
+}
 /////////////////////////////////////////
 
 MatrixCOO::MatrixCOO(size_t m, size_t n) : m{m}, n{n}
@@ -167,13 +190,30 @@ MatrixCOO::MatrixCOO(size_t m, size_t n) : m{m}, n{n}
 //     std::copy(A.data.begin(),A.data.end(),data.begin() );
 // }
 MatrixCOO::MatrixCOO(size_t m, size_t n, std::function<double(size_t, size_t)> generator) : m{m}, n{n}
-{ // TODO std generate parallel
+{ // TODO std algorithm generate parallel
     double A_ij;
     for (size_t i{}; i < m; ++i)
     {
         for (size_t j{}; j < n; ++j)
         {
             A_ij = generator(i, j);
+            if (A_ij != 0.0)
+            {
+                data[{i, j}] = A_ij;
+            }
+        }
+    }
+}
+MatrixCOO::MatrixCOO(const MatrixD &A)
+: m{A.m}, n{A.n}
+{
+    // TODO std algorithm parallel
+    double A_ij;
+    for (size_t i{}; i < m; ++i)
+    {
+        for (size_t j{}; j < n; ++j)
+        {
+            A_ij = A(i, j);
             if (A_ij != 0.0)
             {
                 data[{i, j}] = A_ij;
@@ -324,20 +364,6 @@ MatrixCOO operator*(const MatrixCOO &A, const MatrixCOO &B)
                  C(i,k) += A_ij * B(j,k); });
     return C;
 }
-MatrixCOO relu(const MatrixCOO &A)
-{
-    MatrixCOO C{A.m, A.n};
-    std::for_each(A.data.begin(), A.data.end(), [&C](const auto &e)
-                  {
-            auto [i,j] {e.first};
-            auto A_ij { e.second};
-            auto C_ij = relu(A_ij); 
-            if ( C_ij != 0)
-                {C.data[{i,j}] = C_ij;}
-            else
-                {C.data.erase({i,j});} });
-    return C;
-}
 std::ostream &operator<<(std::ostream &out, const MatrixCOO &matrix)
 {
     for (size_t x = 0; x < matrix.m; x++)
@@ -353,4 +379,42 @@ std::ostream &operator<<(std::ostream &out, const MatrixCOO &matrix)
     //     std::cout << "m[" << k.first << "," << k.second << "] = " << v << std::endl;
 
     return out;
+}
+MatrixCOO relu(const MatrixCOO &A)
+{
+    MatrixCOO C{A.m, A.n};
+    std::for_each(A.data.begin(), A.data.end(), [&C](const auto &e)
+                  {
+            auto [i,j] {e.first};
+            auto A_ij { e.second};
+            auto C_ij = relu(A_ij); 
+            if ( C_ij != 0)
+                {C.data[{i,j}] = C_ij;}
+            else
+                {C.data.erase({i,j});} });
+    return C;
+}
+double MatrixCOO::outdegree(size_t v)
+{
+    // TODO unweighted ??
+    // TODO std algorithm
+    double sum{0};
+    std::for_each(data.begin(), data.end(), [&](const auto &e)
+                  {
+            auto [i,j] {e.first};
+            auto A_ij { e.second};
+            if (i == v) sum += A_ij; });
+    return sum;
+}
+double MatrixCOO::indegree(size_t v)
+{
+    // TODO unweighted ??
+    // TODO std algorithm
+    double sum{0};
+    std::for_each(data.begin(), data.end(), [&](const auto &e)
+                  {
+            auto [i,j] {e.first};
+            auto A_ij { e.second};
+            if (j == v) sum += A_ij; });
+    return sum;
 }

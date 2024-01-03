@@ -32,5 +32,7 @@ int main()
     std::cout << m * M << std::endl;
     relu(M);
 
+    std::cout << MatrixCOO(MatrixD(m)) << std::endl;
+
     return 0;
 }
