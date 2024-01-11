@@ -5,21 +5,18 @@
 
 #include "matrix.hpp"
 
-double relu(double x)
+constexpr double relu(double x)
 {
     return (x > 0) ? x : 0;
 }
 
 /////////////////////////////////
 
-MatrixD::MatrixD(size_t m, size_t n, double value) : m{m}, n{n}
+MatrixD::MatrixD(size_t m, size_t n, double value) : m{m}, n{n}, data{std::vector<double>(m * n, value)}
 {
-    data.resize(m * n);
-    std::fill(data.begin(), data.end(), value);
 }
-MatrixD::MatrixD(size_t m, size_t n, std::function<double(size_t, size_t)> generator) : m{m}, n{n}
+MatrixD::MatrixD(size_t m, size_t n, std::function<double(size_t, size_t)> generator) : m{m}, n{n}, data{std::vector<double>(m * n)}
 { // TODO std generate parallel
-    data.resize(m * n);
     for (size_t i{}; i < m; ++i)
     {
         for (size_t j{}; j < n; ++j)
@@ -28,9 +25,8 @@ MatrixD::MatrixD(size_t m, size_t n, std::function<double(size_t, size_t)> gener
         }
     }
 }
-MatrixD::MatrixD(const MatrixCOO &A) : m{A.m}, n{A.n}
+MatrixD::MatrixD(const MatrixCOO &A) : m{A.m}, n{A.n}, data{std::vector<double>(m * n)}
 {
-    data.resize(m * n);
     std::for_each(A.data.begin(), A.data.end(),
                   [&](const auto &e)
                   {
@@ -180,6 +176,15 @@ double MatrixD::indegree(size_t v)
     }
     return sum;
 }
+MatrixD MatrixD::t()
+{
+    MatrixD T{
+        n, m, [&](size_t j, size_t i)
+        {
+            return (*this)(i, j);
+        }};
+    return T;
+}
 /////////////////////////////////////////
 
 MatrixCOO::MatrixCOO(size_t m, size_t n) : m{m}, n{n}
@@ -205,7 +210,7 @@ MatrixCOO::MatrixCOO(size_t m, size_t n, std::function<double(size_t, size_t)> g
     }
 }
 MatrixCOO::MatrixCOO(const MatrixD &A)
-: m{A.m}, n{A.n}
+    : m{A.m}, n{A.n}
 {
     // TODO std algorithm parallel
     double A_ij;
@@ -417,4 +422,14 @@ double MatrixCOO::indegree(size_t v)
             auto A_ij { e.second};
             if (j == v) sum += A_ij; });
     return sum;
+}
+MatrixCOO MatrixCOO::t()
+{
+    MatrixCOO T{n, m};
+    std::for_each(data.begin(), data.end(), [&](const auto &e)
+                  {
+            auto [i,j] {e.first};
+            auto A_ij { e.second};
+            T(j,i) = A_ij; });
+    return T;
 }

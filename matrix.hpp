@@ -6,7 +6,7 @@
 #include <vector>
 #include <map>
 
-double relu(double x);
+constexpr double relu(double x);
 
 class Matrix;
 class MatrixD;
@@ -31,6 +31,8 @@ public:
     // TODO rvalue constructor
     ~MatrixD();
 
+    friend class MatrixCOO;
+
     double &operator()(size_t row, size_t col);
     double operator()(size_t row, size_t col) const;
     double &operator[](size_t index);
@@ -51,6 +53,8 @@ public:
     friend MatrixD relu(const MatrixD &A);
     double outdegree(size_t v);
     double indegree(size_t v);
+
+    MatrixD t();
 };
 
 /////////////////////////////////////
@@ -69,7 +73,7 @@ public:
     MatrixCOO(const MatrixD &A);
     ~MatrixCOO();
 
-    friend MatrixD::MatrixD(const MatrixCOO &A);
+    friend class MatrixD;
 
     double &operator()(size_t row, size_t col);
     double operator()(size_t row, size_t col) const;
@@ -93,6 +97,8 @@ public:
     friend MatrixCOO relu(const MatrixCOO &A);
     double outdegree(size_t v);
     double indegree(size_t v);
+
+    MatrixCOO t();
 };
 ///////////////////////////////////
 #endif

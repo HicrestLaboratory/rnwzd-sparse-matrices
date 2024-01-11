@@ -15,24 +15,24 @@ int main()
     std::random_device seed;
     std::mt19937 generator(seed());
     std::uniform_real_distribution UniRe(-0.5, 0.5);
-    MatrixCOO A{2, 2, [&](auto i, auto j)
-                { return UniRe(generator); }};
+    MatrixCOO A{3, 3, [&](auto i, auto j)
+                { return (i < j) ? 1 : 0; }};
 
     std::cout << A << std::endl;
-    std::cout << relu(A) << std::endl;
-    MatrixD B(A);
-    MatrixD M(3, 2, 1);
 
-    MatrixCOO m(2, 3);
-    m(0, 0) = 1;
-    m(0, 1) = 1;
-    m(1, 1) = -2;
-    std::cout << M << std::endl;
-    std::cout << m << std::endl;
-    std::cout << m * M << std::endl;
-    relu(M);
+    MatrixCOO W(2, 2);
 
-    std::cout << MatrixCOO(MatrixD(m)) << std::endl;
+    W(0, 0) = 1;
+    W(0, 1) = 2;
+    W(1, 0) = 3;
+    W(1, 1) = 4;
+
+    MatrixD H(2, 3, 1.0);
+
+    std::cout << W << std::endl;
+    std::cout << H << std::endl;
+
+    std::cout << W * H * A << std::endl;
 
     return 0;
 }
