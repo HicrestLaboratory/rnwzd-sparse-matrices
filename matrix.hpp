@@ -20,15 +20,17 @@ class Matrix
 
 class MatrixD : public Matrix
 {
-private:
-    std::vector<double> data{};
-
 public:
     // TODO public?
     size_t m, n;
 
+private:
+    std::vector<double> data{};
+
+public:
     MatrixD(size_t m, size_t n, double value = 0);
     MatrixD(size_t m, size_t n, std::function<double(size_t, size_t)> generator);
+    MatrixD(const std::vector<std::vector<double>> &vv);
     MatrixD(const MatrixCOO &A);
     MatrixD(const EdgeList &EL);
     ~MatrixD();
@@ -63,15 +65,17 @@ public:
 
 class MatrixCOO : public Matrix
 {
-private:
-    std::map<std::pair<size_t, size_t>, double> data{};
-
 public:
     // TODO public?
     size_t m, n;
 
+private:
+    std::map<std::pair<size_t, size_t>, double> data{};
+
+public:
     MatrixCOO(size_t m, size_t n);
     MatrixCOO(size_t m, size_t n, std::function<double(size_t, size_t)> generator);
+    MatrixCOO(const std::vector<std::vector<double>> &vv);
     MatrixCOO(const MatrixD &A);
     MatrixCOO(const EdgeList &EL);
     ~MatrixCOO();

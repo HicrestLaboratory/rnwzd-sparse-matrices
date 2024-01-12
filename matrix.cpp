@@ -27,6 +27,17 @@ MatrixD::MatrixD(size_t m, size_t n, std::function<double(size_t, size_t)> gener
         }
     }
 }
+MatrixD::MatrixD(const std::vector<std::vector<double>> &vv)
+    : m{vv.size()}, n{vv[0].size()}, data{std::vector<double>(m * n)}
+{ // TODO std generate parallel
+    for (size_t i{}; i < m; ++i)
+    {
+        for (size_t j{}; j < n; ++j)
+        {
+            data[i * n + j] = vv[i][j];
+        }
+    }
+}
 MatrixD::MatrixD(const MatrixCOO &A)
     : m{A.m}, n{A.n}, data{std::vector<double>(A.m * A.n)}
 {
@@ -38,7 +49,7 @@ MatrixD::MatrixD(const MatrixCOO &A)
                     data[i * n + j] = A_ij; });
 }
 MatrixD::MatrixD(const EdgeList &EL)
-    : m{EL.size()}, n{EL.size()}, data{std::vector<double>(EL.size()*EL.size())}
+    : m{EL.size()}, n{EL.size()}, data{std::vector<double>(EL.size() * EL.size())}
 {
     for (size_t v{}; v < n; ++v)
     {
@@ -202,10 +213,12 @@ MatrixD MatrixD::t()
 }
 /////////////////////////////////////////
 
-MatrixCOO::MatrixCOO(size_t m, size_t n) : m{m}, n{n}
+MatrixCOO::MatrixCOO(size_t m, size_t n)
+    : m{m}, n{n}
 {
 }
-MatrixCOO::MatrixCOO(size_t m, size_t n, std::function<double(size_t, size_t)> generator) : m{m}, n{n}
+MatrixCOO::MatrixCOO(size_t m, size_t n, std::function<double(size_t, size_t)> generator)
+    : m{m}, n{n}
 { // TODO std algorithm generate parallel
     double A_ij;
     for (size_t i{}; i < m; ++i)
@@ -213,6 +226,22 @@ MatrixCOO::MatrixCOO(size_t m, size_t n, std::function<double(size_t, size_t)> g
         for (size_t j{}; j < n; ++j)
         {
             A_ij = generator(i, j);
+            if (A_ij != 0.0)
+            {
+                data[{i, j}] = A_ij;
+            }
+        }
+    }
+}
+MatrixCOO::MatrixCOO(const std::vector<std::vector<double>> &vv)
+    : m{vv.size()}, n{vv[0].size()}
+{ // TODO std generate parallel
+    double A_ij;
+    for (size_t i{}; i < m; ++i)
+    {
+        for (size_t j{}; j < n; ++j)
+        {
+            A_ij = vv[i][j];
             if (A_ij != 0.0)
             {
                 data[{i, j}] = A_ij;

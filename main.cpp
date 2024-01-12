@@ -44,9 +44,10 @@ int main()
         {},
         {{1, 3}, {0, 4}}};
 
-std::cout<< edge_list.size() <<std::endl;
-    MatrixD B{edge_list};
-    
-    std::cout << B << std::endl;
+    MatrixD C{edge_list};
+    std::cout << C << std::endl;
+
+    MatrixCOO D{{{1, 2}, {3, 4}}};
+    std::cout << D << std::endl;
     return 0;
 }
