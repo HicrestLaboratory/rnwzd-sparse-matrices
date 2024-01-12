@@ -7,14 +7,17 @@
 #include <utility>
 #include <numeric>
 #include <random>
+#include <cmath>
 
 #include "matrix.hpp"
+#include "gnn.hpp"
 
 class Foo
 {
 private:
     MatrixD W, B;
 };
+
 int main()
 {
     std::random_device seed;
@@ -47,7 +50,9 @@ int main()
     MatrixD C{edge_list};
     std::cout << C << std::endl;
 
-    MatrixCOO D{{{1, 2}, {3, 4}}};
+    MatrixCOO D{{{1, 2, 3}, {3, 4, 5}}};
     std::cout << D << std::endl;
+
+    std::cout << MSELoss(D,D) << std::endl;
     return 0;
 }

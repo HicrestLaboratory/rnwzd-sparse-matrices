@@ -16,14 +16,18 @@ typedef std::vector<std::vector<std::pair<size_t, double>>> EdgeList;
 
 class Matrix
 { // TODO
+private: 
+double value {0};
+public:
+    // TODO public?
+    size_t m, n;
+    Matrix(size_t m, size_t n);
+    virtual double &operator()(size_t row, size_t col);
+    virtual double operator()(size_t row, size_t col) const; 
 };
 
 class MatrixD : public Matrix
 {
-public:
-    // TODO public?
-    size_t m, n;
-
 private:
     std::vector<double> data{};
 
@@ -65,10 +69,6 @@ public:
 
 class MatrixCOO : public Matrix
 {
-public:
-    // TODO public?
-    size_t m, n;
-
 private:
     std::map<std::pair<size_t, size_t>, double> data{};
 

@@ -9,15 +9,28 @@ constexpr double relu(double x)
 {
     return (x > 0) ? x : 0;
 }
+//////////////////////////////
 
+Matrix::Matrix(size_t m, size_t n)
+    : m{m}, n{n}
+{
+}
+double &Matrix::operator()(size_t row, size_t col)
+{
+    return value;
+}
+double Matrix::operator()(size_t row, size_t col) const
+{
+    return value;
+}
 /////////////////////////////////
 
 MatrixD::MatrixD(size_t m, size_t n, double value)
-    : m{m}, n{n}, data{std::vector<double>(m * n, value)}
+    : Matrix(m, n), data{std::vector<double>(m * n, value)}
 {
 }
 MatrixD::MatrixD(size_t m, size_t n, std::function<double(size_t, size_t)> generator)
-    : m{m}, n{n}, data{std::vector<double>(m * n)}
+    : Matrix(m, n), data{std::vector<double>(m * n)}
 { // TODO std generate parallel
     for (size_t i{}; i < m; ++i)
     {
@@ -28,10 +41,11 @@ MatrixD::MatrixD(size_t m, size_t n, std::function<double(size_t, size_t)> gener
     }
 }
 MatrixD::MatrixD(const std::vector<std::vector<double>> &vv)
-    : m{vv.size()}, n{vv[0].size()}, data{std::vector<double>(m * n)}
+    : Matrix(vv.size(), vv[0].size()), data{std::vector<double>(m * n)}
 { // TODO std generate parallel
     for (size_t i{}; i < m; ++i)
     {
+        assert(vv[i].size() == n);
         for (size_t j{}; j < n; ++j)
         {
             data[i * n + j] = vv[i][j];
@@ -39,7 +53,7 @@ MatrixD::MatrixD(const std::vector<std::vector<double>> &vv)
     }
 }
 MatrixD::MatrixD(const MatrixCOO &A)
-    : m{A.m}, n{A.n}, data{std::vector<double>(A.m * A.n)}
+    : Matrix(A.m, A.n), data{std::vector<double>(A.m * A.n)}
 {
     std::for_each(A.data.begin(), A.data.end(),
                   [&](const auto &e)
@@ -49,7 +63,7 @@ MatrixD::MatrixD(const MatrixCOO &A)
                     data[i * n + j] = A_ij; });
 }
 MatrixD::MatrixD(const EdgeList &EL)
-    : m{EL.size()}, n{EL.size()}, data{std::vector<double>(EL.size() * EL.size())}
+    : Matrix(EL.size(), EL.size()), data{std::vector<double>(EL.size() * EL.size())}
 {
     for (size_t v{}; v < n; ++v)
     {
@@ -214,11 +228,11 @@ MatrixD MatrixD::t()
 /////////////////////////////////////////
 
 MatrixCOO::MatrixCOO(size_t m, size_t n)
-    : m{m}, n{n}
+    : Matrix(m, n)
 {
 }
 MatrixCOO::MatrixCOO(size_t m, size_t n, std::function<double(size_t, size_t)> generator)
-    : m{m}, n{n}
+    : Matrix(m, n)
 { // TODO std algorithm generate parallel
     double A_ij;
     for (size_t i{}; i < m; ++i)
@@ -234,11 +248,12 @@ MatrixCOO::MatrixCOO(size_t m, size_t n, std::function<double(size_t, size_t)> g
     }
 }
 MatrixCOO::MatrixCOO(const std::vector<std::vector<double>> &vv)
-    : m{vv.size()}, n{vv[0].size()}
+    : Matrix(vv.size(), vv[0].size())
 { // TODO std generate parallel
     double A_ij;
     for (size_t i{}; i < m; ++i)
     {
+        assert(vv[i].size() == n);
         for (size_t j{}; j < n; ++j)
         {
             A_ij = vv[i][j];
@@ -250,7 +265,7 @@ MatrixCOO::MatrixCOO(const std::vector<std::vector<double>> &vv)
     }
 }
 MatrixCOO::MatrixCOO(const MatrixD &A)
-    : m{A.m}, n{A.n}
+    : Matrix(A.m, A.n)
 {
     // TODO std algorithm parallel
     double A_ij;
@@ -267,7 +282,7 @@ MatrixCOO::MatrixCOO(const MatrixD &A)
     }
 }
 MatrixCOO::MatrixCOO(const EdgeList &EL)
-    : m{EL.size()}, n{EL.size()}
+    : Matrix(EL.size(), EL.size())
 {
     for (size_t v{}; v < n; ++v)
     {
