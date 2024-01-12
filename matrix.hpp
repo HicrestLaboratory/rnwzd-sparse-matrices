@@ -12,6 +12,8 @@ class Matrix;
 class MatrixD;
 class MatrixCOO;
 
+typedef std::vector<std::vector<std::pair<size_t, double>>> EdgeList;
+
 class Matrix
 { // TODO
 };
@@ -28,7 +30,7 @@ public:
     MatrixD(size_t m, size_t n, double value = 0);
     MatrixD(size_t m, size_t n, std::function<double(size_t, size_t)> generator);
     MatrixD(const MatrixCOO &A);
-    // TODO rvalue constructor
+    MatrixD(const EdgeList &EL);
     ~MatrixD();
 
     friend class MatrixCOO;
@@ -71,6 +73,7 @@ public:
     MatrixCOO(size_t m, size_t n);
     MatrixCOO(size_t m, size_t n, std::function<double(size_t, size_t)> generator);
     MatrixCOO(const MatrixD &A);
+    MatrixCOO(const EdgeList &EL);
     ~MatrixCOO();
 
     friend class MatrixD;
@@ -92,6 +95,7 @@ public:
     friend MatrixCOO operator/(const MatrixCOO &A, double value);
     friend MatrixCOO operator*(const MatrixCOO &A, const MatrixD &B);
     friend MatrixCOO operator*(const MatrixCOO &A, const MatrixCOO &B);
+    friend MatrixCOO operator*(const MatrixD &A, const MatrixCOO &B);
     friend std::ostream &operator<<(std::ostream &out, const MatrixCOO &matrix);
 
     friend MatrixCOO relu(const MatrixCOO &A);

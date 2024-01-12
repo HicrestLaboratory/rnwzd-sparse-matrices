@@ -12,10 +12,12 @@ constexpr double relu(double x)
 
 /////////////////////////////////
 
-MatrixD::MatrixD(size_t m, size_t n, double value) : m{m}, n{n}, data{std::vector<double>(m * n, value)}
+MatrixD::MatrixD(size_t m, size_t n, double value)
+    : m{m}, n{n}, data{std::vector<double>(m * n, value)}
 {
 }
-MatrixD::MatrixD(size_t m, size_t n, std::function<double(size_t, size_t)> generator) : m{m}, n{n}, data{std::vector<double>(m * n)}
+MatrixD::MatrixD(size_t m, size_t n, std::function<double(size_t, size_t)> generator)
+    : m{m}, n{n}, data{std::vector<double>(m * n)}
 { // TODO std generate parallel
     for (size_t i{}; i < m; ++i)
     {
@@ -25,7 +27,8 @@ MatrixD::MatrixD(size_t m, size_t n, std::function<double(size_t, size_t)> gener
         }
     }
 }
-MatrixD::MatrixD(const MatrixCOO &A) : m{A.m}, n{A.n}, data{std::vector<double>(m * n)}
+MatrixD::MatrixD(const MatrixCOO &A)
+    : m{A.m}, n{A.n}, data{std::vector<double>(A.m * A.n)}
 {
     std::for_each(A.data.begin(), A.data.end(),
                   [&](const auto &e)
@@ -34,6 +37,18 @@ MatrixD::MatrixD(const MatrixCOO &A) : m{A.m}, n{A.n}, data{std::vector<double>(
                     auto A_ij { e.second};
                     data[i * n + j] = A_ij; });
 }
+MatrixD::MatrixD(const EdgeList &EL)
+    : m{EL.size()}, n{EL.size()}, data{std::vector<double>(EL.size()*EL.size())}
+{
+    for (size_t v{}; v < n; ++v)
+    {
+        for (auto [u, w] : EL[v])
+        {
+            data[v * n + u] = w;
+        }
+    }
+}
+
 // TODO rvalue constructor
 MatrixD::~MatrixD()
 {
@@ -190,10 +205,6 @@ MatrixD MatrixD::t()
 MatrixCOO::MatrixCOO(size_t m, size_t n) : m{m}, n{n}
 {
 }
-// MatrixCOO(const MatrixCOO &A) : m{A.m}, n{A.n}
-// {
-//     std::copy(A.data.begin(),A.data.end(),data.begin() );
-// }
 MatrixCOO::MatrixCOO(size_t m, size_t n, std::function<double(size_t, size_t)> generator) : m{m}, n{n}
 { // TODO std algorithm generate parallel
     double A_ij;
@@ -223,6 +234,17 @@ MatrixCOO::MatrixCOO(const MatrixD &A)
             {
                 data[{i, j}] = A_ij;
             }
+        }
+    }
+}
+MatrixCOO::MatrixCOO(const EdgeList &EL)
+    : m{EL.size()}, n{EL.size()}
+{
+    for (size_t v{}; v < n; ++v)
+    {
+        for (auto [u, w] : EL[v])
+        {
+            data[{v, u}] = w;
         }
     }
 }
@@ -367,6 +389,18 @@ MatrixCOO operator*(const MatrixCOO &A, const MatrixCOO &B)
             auto A_ij { e.second};
             for (int k = 0; k < B.n; ++k)
                  C(i,k) += A_ij * B(j,k); });
+    return C;
+}
+MatrixCOO operator*(const MatrixD &A, const MatrixCOO &B)
+{
+    assert(A.n == B.m);
+    MatrixCOO C{A.m, B.n};
+    std::for_each(B.data.begin(), B.data.end(), [&](const auto &e)
+                  {
+            auto [j,k] {e.first};
+            auto B_jk { e.second};
+            for (int i = 0; i < A.m; ++i)
+                 C(i,k) += A(i,j) * B_jk; });
     return C;
 }
 std::ostream &operator<<(std::ostream &out, const MatrixCOO &matrix)

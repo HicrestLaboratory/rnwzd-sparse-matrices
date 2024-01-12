@@ -10,6 +10,11 @@
 
 #include "matrix.hpp"
 
+class Foo
+{
+private:
+    MatrixD W, B;
+};
 int main()
 {
     std::random_device seed;
@@ -34,5 +39,14 @@ int main()
 
     std::cout << W * H * A << std::endl;
 
+    EdgeList edge_list{
+        {{1, 1}, {2, 2}},
+        {},
+        {{1, 3}, {0, 4}}};
+
+std::cout<< edge_list.size() <<std::endl;
+    MatrixD B{edge_list};
+    
+    std::cout << B << std::endl;
     return 0;
 }
