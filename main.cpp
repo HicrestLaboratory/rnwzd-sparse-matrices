@@ -50,9 +50,11 @@ int main()
     MatrixD C{edge_list};
     std::cout << C << std::endl;
 
-    MatrixCOO D{{{1, 2, 3}, {3, 4, 5}}};
+    MatrixCOO D{{{1, 2, 3},
+                 {3, 4, 5}}};
     std::cout << D << std::endl;
-
-    std::cout << MSELoss(D,D) << std::endl;
+    MatrixCOO E{{{1, 2, 3},
+                 {4, 4, 6}}};
+    std::cout << MSELoss(D, E) << std::endl;
     return 0;
 }

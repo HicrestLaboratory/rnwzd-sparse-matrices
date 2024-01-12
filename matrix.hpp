@@ -41,8 +41,8 @@ public:
 
     friend class MatrixCOO;
 
-    double &operator()(size_t row, size_t col);
-    double operator()(size_t row, size_t col) const;
+    double &operator()(size_t row, size_t col) override;
+    double operator()(size_t row, size_t col) const override;
     double &operator[](size_t index);
     double operator[](size_t index) const;
     MatrixD operator+() const;

@@ -4,7 +4,7 @@
 
 #include "matrix.hpp"
 
-double MSELoss(Matrix A, Matrix B)
+double MSELoss(const Matrix& A, const Matrix& B)
 {
     // TODO std parallel
     assert(A.m == B.m);
@@ -13,7 +13,7 @@ double MSELoss(Matrix A, Matrix B)
     for (size_t i{}; i < A.m; ++i)
     {
         for (size_t j{}; j < A.n; ++j)
-        {
+        {   
             sum += std::pow(A(i, j) - B(i, j), 2);
         }
     }

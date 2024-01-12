@@ -3,6 +3,6 @@
 
 #include "matrix.hpp"
 
-double MSELoss(Matrix A, Matrix B);
+double MSELoss(const Matrix& A, const Matrix& B);
 
 #endif
