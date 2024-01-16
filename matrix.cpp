@@ -11,6 +11,10 @@ constexpr double relu(double x)
 }
 //////////////////////////////
 
+Matrix::Matrix()
+    : m{0}, n{0}
+{
+}
 Matrix::Matrix(size_t m, size_t n)
     : m{m}, n{n}
 {

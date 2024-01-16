@@ -96,7 +96,7 @@ MatrixCOO MatrixCOOFromFile(std::string file_name)
 
     if (!file)
     {
-        std::cerr << "Could not open the file " << fileName << ".";
+        std::cerr << "Could not open the file " << file_name << ".";
         exit(EXIT_FAILURE);
     }
 

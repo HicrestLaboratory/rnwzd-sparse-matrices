@@ -21,6 +21,7 @@ double value {0};
 public:
     // TODO public?
     size_t m, n;
+    Matrix();
     Matrix(size_t m, size_t n);
     virtual double &operator()(size_t row, size_t col);
     virtual double operator()(size_t row, size_t col) const; 
