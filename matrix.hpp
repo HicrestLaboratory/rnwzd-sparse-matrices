@@ -57,6 +57,7 @@ public:
     friend MatrixD operator/(const MatrixD &A, double value);
     friend MatrixD operator*(const MatrixD &A, const MatrixD &B);
 
+    friend MatrixD ewprod(const MatrixD &A, const MatrixD &B);
     friend std::ostream &operator<<(std::ostream &out, const MatrixD &matrix);
 
     friend MatrixD relu(const MatrixD &A);
@@ -103,6 +104,9 @@ public:
     friend MatrixCOO operator*(const MatrixD &A, const MatrixCOO &B);
     friend std::ostream &operator<<(std::ostream &out, const MatrixCOO &matrix);
 
+    friend MatrixD ewprod(const MatrixCOO &A, const MatrixCOO &B);
+    friend MatrixD ewprod(const MatrixD &A, const MatrixCOO &B);
+    friend MatrixD ewprod(const MatrixCOO &A, const MatrixD &B);
     friend MatrixCOO relu(const MatrixCOO &A);
     double outdegree(size_t v);
     double indegree(size_t v);

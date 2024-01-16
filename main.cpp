@@ -79,6 +79,15 @@ int main()
 
     std::cout << Out << std::endl;
 
-    ggnl.backward_propagation();
+    MatrixD a{{{1, 2, 3},
+                 {1, 2, 3}}};
+    std::cout << a.m << std::endl;
+    std::cout << a.n << std::endl;
+
+    MatrixCOO b{{{0, 1, 0},
+                 {1, 0, 1}}};
+    std::cout << b.m << std::endl;
+    std::cout << b.n << std::endl;
+    std::cout << ewprod(a, b) << std::endl;
     return 0;
 }

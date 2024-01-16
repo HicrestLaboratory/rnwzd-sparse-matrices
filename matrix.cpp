@@ -176,13 +176,27 @@ MatrixD operator*(const MatrixD &A, const MatrixD &B)
     }
     return C;
 }
+MatrixD ewprod(const MatrixD &A, const MatrixD &B)
+{
+    assert(A.m == B.m);
+    assert(A.n == B.n);
+    MatrixD C{A.m, B.n, 0};
+    for (size_t i = 0; i < A.m; i++)
+    {
+        for (size_t j = 0; j < A.n; j++)
+        {
+            C(i, j) = A(i, j) * B(i, j);
+        }
+    }
+    return C;
+}
 std::ostream &operator<<(std::ostream &out, const MatrixD &matrix)
 {
-    for (int x = 0; x < matrix.m; x++)
+    for (size_t i = 0; i < matrix.m; i++)
     {
-        for (int y = 0; y < matrix.n; y++)
+        for (size_t j = 0; j < matrix.n; j++)
         {
-            out << matrix(x, y) << " ";
+            out << matrix(i, j) << " ";
         }
         out << std::endl;
     };
@@ -451,6 +465,46 @@ MatrixCOO operator*(const MatrixD &A, const MatrixCOO &B)
                  C(i,k) += A(i,j) * B_jk; });
     return C;
 }
+MatrixD ewprod(const MatrixCOO &A, const MatrixCOO &B)
+{   
+    
+    assert(A.m == B.m);
+    assert(A.n == B.n);
+    MatrixCOO C{A.m, A.n};
+    std::for_each(A.data.begin(), A.data.end(), [&B, &C](const auto &e)
+                  {
+            auto [i,j] {e.first};
+            auto A_ij { e.second};
+            C(i,j) = A_ij * B(i,j); });
+    return C;
+}
+MatrixD ewprod(const MatrixD &A, const MatrixCOO &B)
+{   
+    
+    assert(A.m == B.m);
+    assert(A.n == B.n);
+    MatrixCOO C{A.m, A.n};
+    std::for_each(B.data.begin(), B.data.end(), [&A, &C](const auto &e)
+                  {
+            auto [i,j] {e.first};
+            auto B_ij { e.second};
+            C(i,j) = B_ij * A(i,j); });
+    return C;
+}
+MatrixD ewprod(const MatrixCOO &A, const MatrixD &B)
+{   
+    
+    assert(A.m == B.m);
+    assert(A.n == B.n);
+    MatrixCOO C{A.m, A.n};
+    std::for_each(A.data.begin(), A.data.end(), [&B, &C](const auto &e)
+                  {
+            auto [i,j] {e.first};
+            auto A_ij { e.second};
+            C(i,j) = A_ij * B(i,j); });
+    return C;
+}
+
 std::ostream &operator<<(std::ostream &out, const MatrixCOO &matrix)
 {
     for (size_t x = 0; x < matrix.m; x++)
