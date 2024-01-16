@@ -7,6 +7,7 @@
 #include <map>
 
 constexpr double relu(double x);
+constexpr double relu_prime(double x);
 
 class Matrix;
 class MatrixD;
@@ -61,6 +62,7 @@ public:
     friend std::ostream &operator<<(std::ostream &out, const MatrixD &matrix);
 
     friend MatrixD relu(const MatrixD &A);
+    friend MatrixD relu_prime(const MatrixD &A);
     double outdegree(size_t v);
     double indegree(size_t v);
 
@@ -108,6 +110,7 @@ public:
     friend MatrixD ewprod(const MatrixD &A, const MatrixCOO &B);
     friend MatrixD ewprod(const MatrixCOO &A, const MatrixD &B);
     friend MatrixCOO relu(const MatrixCOO &A);
+    friend MatrixCOO relu_prime(const MatrixCOO &A);
     double outdegree(size_t v);
     double indegree(size_t v);
 

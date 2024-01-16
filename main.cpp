@@ -58,6 +58,25 @@ public:
         return input_error;
     }
 };
+
+class ReLULayer : public Layer
+{
+public:
+    ReLULayer()
+    {
+    }
+    MatrixD forward_propagation(const MatrixD &input, const MatrixCOO &A)
+    {
+        m_input = input;
+        m_output = relu(input);
+        return m_output;
+    }
+    MatrixD backward_propagation(const MatrixD &output_error, double learning_rate)
+    {
+        return ewprod(output_error, relu_prime(m_input));
+    }
+};
+
 int main()
 {
     std::random_device seed;

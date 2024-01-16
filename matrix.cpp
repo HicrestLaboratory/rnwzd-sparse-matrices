@@ -9,6 +9,11 @@ constexpr double relu(double x)
 {
     return (x > 0) ? x : 0;
 }
+constexpr double relu_prime(double x)
+{
+    return (x > 0) ? 1 : 0;
+}
+
 //////////////////////////////
 
 Matrix::Matrix()
@@ -208,6 +213,14 @@ MatrixD relu(const MatrixD &A)
     std::transform(
         A.data.begin(), A.data.end(), C.data.begin(), [](const auto &e)
         { return relu(e); });
+    return C;
+}
+MatrixD relu_prime(const MatrixD &A)
+{
+    MatrixD C{A.m, A.n};
+    std::transform(
+        A.data.begin(), A.data.end(), C.data.begin(), [](const auto &e)
+        { return relu_prime(e); });
     return C;
 }
 double MatrixD::outdegree(size_t v)
@@ -529,6 +542,20 @@ MatrixCOO relu(const MatrixCOO &A)
             auto [i,j] {e.first};
             auto A_ij { e.second};
             auto C_ij = relu(A_ij); 
+            if ( C_ij != 0)
+                {C.data[{i,j}] = C_ij;}
+            else
+                {C.data.erase({i,j});} });
+    return C;
+}
+MatrixCOO relu_prime(const MatrixCOO &A)
+{
+    MatrixCOO C{A.m, A.n};
+    std::for_each(A.data.begin(), A.data.end(), [&C](const auto &e)
+                  {
+            auto [i,j] {e.first};
+            auto A_ij { e.second};
+            auto C_ij = relu_prime(A_ij); 
             if ( C_ij != 0)
                 {C.data[{i,j}] = C_ij;}
             else
