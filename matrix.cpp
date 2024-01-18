@@ -33,7 +33,10 @@ double Matrix::operator()(size_t row, size_t col) const
     return value;
 }
 /////////////////////////////////
-
+MatrixD::MatrixD()
+    : Matrix(0,0), data{}
+{
+}
 MatrixD::MatrixD(size_t m, size_t n, double value)
     : Matrix(m, n), data{std::vector<double>(m * n, value)}
 {

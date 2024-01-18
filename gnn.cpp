@@ -4,18 +4,22 @@
 
 #include "matrix.hpp"
 
-double MSELoss(const Matrix& A, const Matrix& B)
+double MSE_loss(const MatrixD &Y, const MatrixD &Y_star)
 {
     // TODO std parallel
-    assert(A.m == B.m);
-    assert(A.n == B.n);
+    assert(Y.m == Y_star.m);
+    assert(Y.n == Y_star.n);
     double sum{0};
-    for (size_t i{}; i < A.m; ++i)
+    for (size_t i{}; i < Y.m; ++i)
     {
-        for (size_t j{}; j < A.n; ++j)
-        {   
-            sum += std::pow(A(i, j) - B(i, j), 2);
+        for (size_t j{}; j < Y.n; ++j)
+        {
+            sum += std::pow(Y(i, j) - Y_star(i, j), 2);
         }
     }
-    return std::sqrt(sum);
+    return sum/(Y.m*Y.n);
+}
+MatrixD MSE_loss_prime(const MatrixD &Y, const MatrixD &Y_star)
+{
+    return 2*(Y-Y_star)/(Y.m*Y.n);
 }

@@ -77,6 +77,65 @@ public:
     }
 };
 
+class Network
+{
+private:
+    std::vector<Layer *> m_layerps{};
+    std::function<double(const MatrixD &, const MatrixD &)> m_loss{MSE_loss};
+    std::function<MatrixD(const MatrixD &, const MatrixD &)> m_loss_prime{MSE_loss_prime};
+
+public:
+    Network()
+    {
+    }
+    Network(std::vector<Layer *> layerps)
+        : m_layerps{layerps}
+    {
+    }
+    void add_layerp(Layer *layer)
+    {
+        m_layerps.push_back(layer);
+    }
+    MatrixD forward(MatrixD input, const MatrixCOO &A)
+    {
+        MatrixD output{input};
+        for (auto &layerp : m_layerps)
+        {
+            output = layerp->forward_propagation(output, A);
+        }
+        return output;
+    }
+    void fit(std::vector<MatrixD> xs,
+             std::vector<MatrixD> As,
+             std::vector<MatrixD> ys,
+             size_t n_epochs, double learning_rate)
+    {
+        assert(xs.size() == As.size() == ys.size());
+
+        auto n_samples{xs.size()};
+        double loss_value{};
+        MatrixD output;
+        MatrixD error;
+        for (size_t epoch{}; epoch < n_epochs; ++epoch)
+        {
+            loss_value = 0;
+            for (size_t j{}; j < n_samples; ++j)
+            {
+                output = forward(xs[j], As[j]);
+                loss_value += m_loss(ys[j], output);
+
+                error = m_loss_prime(ys[j], output);
+                for (auto it = m_layerps.rbegin(); it != m_layerps.rend(); ++it)
+                {
+                    auto layerp = *it;
+                    error = layerp->backward_propagation(error, learning_rate);
+                }
+            }
+            loss_value / n_samples;
+            std::cout << "Epoch " << epoch << "/" << n_epochs << " loss = " << loss_value;
+        }
+    };
+};
 int main()
 {
     std::random_device seed;
@@ -92,16 +151,25 @@ int main()
                 {
                     return (i < j) ? 1 : 0;
                 }};
-    GNNLayer ggnl{2, 3, normal_gen};
+    GNNLayer gnnl{2, 3, normal_gen};
 
-    MatrixD Out = ggnl.forward_propagation(In, A);
+    MatrixD Out = gnnl.forward_propagation(In, A);
+
+    ReLULayer relul{};
+
+    Out = relul.forward_propagation(Out, A);
 
     std::cout << Out << std::endl;
 
+    Network net{{&gnnl, &relul}};
+
+    Out = net.forward(In, A);
+    std::cout << Out << std::endl;
     MatrixD a{{{1, 2, 3},
-                 {1, 2, 3}}};
+               {1, 2, 3}}};
     std::cout << a.m << std::endl;
     std::cout << a.n << std::endl;
+    std::cout << a << std::endl;
 
     MatrixCOO b{{{0, 1, 0},
                  {1, 0, 1}}};

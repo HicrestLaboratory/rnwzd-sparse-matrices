@@ -3,6 +3,8 @@
 
 #include "matrix.hpp"
 
-double MSELoss(const Matrix& A, const Matrix& B);
+double MSE_loss(const MatrixD& A, const MatrixD& B);
+MatrixD MSE_loss_prime(const MatrixD& A, const MatrixD& B);
+
 
 #endif
