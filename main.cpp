@@ -57,6 +57,8 @@ public:
 
         return input_error;
     }
+    MatrixD W(){return m_W;}
+    MatrixD B(){return m_B;}
 };
 
 class ReLULayer : public Layer
@@ -106,11 +108,11 @@ public:
         return output;
     }
     void fit(std::vector<MatrixD> xs,
-             std::vector<MatrixD> As,
+             std::vector<MatrixCOO> As,
              std::vector<MatrixD> ys,
              size_t n_epochs, double learning_rate)
     {
-        assert(xs.size() == As.size() == ys.size());
+        assert(xs.size() == As.size() && xs.size() == ys.size());
 
         auto n_samples{xs.size()};
         double loss_value{};
@@ -132,49 +134,49 @@ public:
                 }
             }
             loss_value / n_samples;
-            std::cout << "Epoch " << epoch << "/" << n_epochs << " loss = " << loss_value;
+            std::cout << "Epoch " << epoch+1 << "/" << n_epochs << " loss = " << loss_value << std::endl;
         }
     };
 };
 int main()
 {
+
+    const auto n_samples{100};
+    const auto n_v{10};     // number of vertices
+    const auto n_h_in{10};  // dimension of input latent vector
+    const auto n_h_out{10}; // dimension of output latent vector
+
+    const auto n_epochs{100};
+    const double learning_rate{-0.01};
+
     std::random_device seed;
     std::mt19937 rand_gen(seed());
     std::normal_distribution Normal(0.0, 2.0);
     auto normal_gen = [&](auto i, auto j)
     { return Normal(rand_gen); };
-    MatrixD In{2, 4, normal_gen};
 
-    std::cout << In << std::endl;
+    GNNLayer gnn1{n_h_in, n_h_out, normal_gen};
+    ReLULayer relu1{};
+    Network net1{{&gnn1, &relu1}};
 
-    MatrixCOO A{4, 4, [](auto i, auto j)
-                {
-                    return (i < j) ? 1 : 0;
-                }};
-    GNNLayer gnnl{2, 3, normal_gen};
+    std::vector<MatrixD> xs{};
+    std::vector<MatrixCOO> As{};
+    std::vector<MatrixD> ys{};
+    for (size_t i{}; i < n_samples; ++i)
+    {
+        MatrixD x{n_h_in, n_v, normal_gen};
+        MatrixCOO A{n_v, n_v, normal_gen};
+        xs.push_back(x);
+        As.push_back(A);
+        ys.push_back(net1.forward(x, A));
+    }
 
-    MatrixD Out = gnnl.forward_propagation(In, A);
+    GNNLayer gnn2{n_h_in, n_h_out, normal_gen};
+    ReLULayer relu2{};
+    Network net2{{&gnn2, &relu2}};
 
-    ReLULayer relul{};
+    net2.fit(xs, As, ys, n_epochs, learning_rate);
 
-    Out = relul.forward_propagation(Out, A);
 
-    std::cout << Out << std::endl;
-
-    Network net{{&gnnl, &relul}};
-
-    Out = net.forward(In, A);
-    std::cout << Out << std::endl;
-    MatrixD a{{{1, 2, 3},
-               {1, 2, 3}}};
-    std::cout << a.m << std::endl;
-    std::cout << a.n << std::endl;
-    std::cout << a << std::endl;
-
-    MatrixCOO b{{{0, 1, 0},
-                 {1, 0, 1}}};
-    std::cout << b.m << std::endl;
-    std::cout << b.n << std::endl;
-    std::cout << ewprod(a, b) << std::endl;
     return 0;
 }
