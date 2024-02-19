@@ -653,3 +653,35 @@ MatrixCOO MatrixCOO::t()
             T(j,i) = A_ij; });
     return T;
 }
+void MatrixCOO::add_row(std::vector<double> row){
+    if (m==0 && n==0){
+        n= row.size();
+    }
+    assert(n==row.size());
+    m+=1;
+    for (size_t j {0};  j<row.size(); ++j){
+            
+            if (row[j]!= 0.0)
+            {
+                data[{m-1, j}] = row[j];
+            }
+        
+    }
+}
+
+void MatrixCOO::add_col(std::vector<double> col){
+    if (m==0 && n==0){
+        n= col.size();
+    }
+    assert(m==col.size());
+    n+=1;
+    for (size_t i {0};  i<col.size(); ++i){
+            
+            if (col[i]!= 0.0)
+            {
+                data[{i, n-1}] = col[i];
+            }
+        
+    }
+}
+

@@ -17,8 +17,8 @@ typedef std::vector<std::vector<std::pair<size_t, double>>> AdjList;
 typedef std::vector<std::tuple<size_t, size_t, double>> EdgeList;
 
 MatrixCOO mcoo_from_el_file(std::string filename,
-                      bool weighted = true,
-                      bool directed = true);
+                            bool weighted = true,
+                            bool directed = true);
 
 class Matrix
 { // TODO
@@ -124,6 +124,8 @@ public:
     double indegree(size_t v);
 
     MatrixCOO t();
+    void add_row(std::vector<double> row);
+    void add_col(std::vector<double> col);
 };
 ///////////////////////////////////
 #endif
