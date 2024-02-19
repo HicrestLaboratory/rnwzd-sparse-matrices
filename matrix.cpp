@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cassert>
 #include <vector>
+#include <fstream>
 
 #include "matrix.hpp"
 
@@ -12,6 +13,57 @@ constexpr double relu(double x)
 constexpr double relu_prime(double x)
 {
     return (x > 0) ? 1 : 0;
+}
+//////////////////////////////////////
+
+MatrixCOO mcoo_from_el_file(std::string filename,
+                      bool weighted,
+                      bool directed)
+{
+    std::ifstream file(filename);
+    if (!file.is_open())
+    {
+        throw std::runtime_error("Could not open file");
+    }
+
+    std::string is, js, ws, line;
+    size_t i{}, j{}, max_idx{};
+    double w{};
+    EdgeList edge_list;
+
+    while (file.good())
+    {
+        std::getline(file, line);
+        if (line[0] == '#')
+            continue;
+        if (weighted)
+            file >> is >> js >> ws;
+        else
+            file >> is >> js;
+        // std::cout << is << ' ' << js << std::endl;
+
+        i = std::stoul(is);
+        j = std::stoul(js);
+        if (weighted)
+            w = std::stod(ws);
+        else
+            w = 1;
+
+        edge_list.push_back(std::make_tuple(i, j, w));
+
+        if (!directed)
+            edge_list.push_back(std::make_tuple(j, i, w));
+        max_idx = std::max({i, j, max_idx});
+    }
+    file.close();
+
+    size_t N = max_idx +1;
+    MatrixCOO A{N,N};
+    for (const auto &[i, j, w] : edge_list)
+    {
+        A(i, j) = w;
+    }
+    return A;
 }
 
 //////////////////////////////
@@ -34,7 +86,7 @@ double Matrix::operator()(size_t row, size_t col) const
 }
 /////////////////////////////////
 MatrixD::MatrixD()
-    : Matrix(0,0), data{}
+    : Matrix(0, 0), data{}
 {
 }
 MatrixD::MatrixD(size_t m, size_t n, double value)
@@ -74,12 +126,12 @@ MatrixD::MatrixD(const MatrixCOO &A)
                     auto A_ij { e.second};
                     data[i * n + j] = A_ij; });
 }
-MatrixD::MatrixD(const EdgeList &EL)
-    : Matrix(EL.size(), EL.size()), data{std::vector<double>(EL.size() * EL.size())}
+MatrixD::MatrixD(const AdjList &AL)
+    : Matrix(AL.size(), AL.size()), data{std::vector<double>(AL.size() * AL.size())}
 {
     for (size_t v{}; v < n; ++v)
     {
-        for (auto [u, w] : EL[v])
+        for (auto [u, w] : AL[v])
         {
             data[v * n + u] = w;
         }
@@ -315,14 +367,16 @@ MatrixCOO::MatrixCOO(const MatrixD &A)
         }
     }
 }
-MatrixCOO::MatrixCOO(const EdgeList &EL)
-    : Matrix(EL.size(), EL.size())
+MatrixCOO::MatrixCOO(const AdjList &AL, bool directed)
+    : Matrix(AL.size(), AL.size())
 {
     for (size_t v{}; v < n; ++v)
     {
-        for (auto [u, w] : EL[v])
+        for (auto [u, w] : AL[v])
         {
             data[{v, u}] = w;
+            if (!directed)
+                data[{u, v}] = w;
         }
     }
 }
@@ -482,8 +536,8 @@ MatrixCOO operator*(const MatrixD &A, const MatrixCOO &B)
     return C;
 }
 MatrixD ewprod(const MatrixCOO &A, const MatrixCOO &B)
-{   
-    
+{
+
     assert(A.m == B.m);
     assert(A.n == B.n);
     MatrixCOO C{A.m, A.n};
@@ -495,8 +549,8 @@ MatrixD ewprod(const MatrixCOO &A, const MatrixCOO &B)
     return C;
 }
 MatrixD ewprod(const MatrixD &A, const MatrixCOO &B)
-{   
-    
+{
+
     assert(A.m == B.m);
     assert(A.n == B.n);
     MatrixCOO C{A.m, A.n};
@@ -508,8 +562,8 @@ MatrixD ewprod(const MatrixD &A, const MatrixCOO &B)
     return C;
 }
 MatrixD ewprod(const MatrixCOO &A, const MatrixD &B)
-{   
-    
+{
+
     assert(A.m == B.m);
     assert(A.n == B.n);
     MatrixCOO C{A.m, A.n};
@@ -523,17 +577,17 @@ MatrixD ewprod(const MatrixCOO &A, const MatrixD &B)
 
 std::ostream &operator<<(std::ostream &out, const MatrixCOO &matrix)
 {
-    for (size_t x = 0; x < matrix.m; x++)
-    {
-        for (size_t y = 0; y < matrix.n; y++)
-        {
-            out << matrix(x, y) << " ";
-        }
-        out << std::endl;
-    };
+    for (const auto &[k, v] : matrix.data)
+        std::cout << "m[" << k.first << "," << k.second << "] = " << v << std::endl;
 
-    // for (const auto &[k, v] : matrix.data)
-    //     std::cout << "m[" << k.first << "," << k.second << "] = " << v << std::endl;
+    // for (size_t x = 0; x < matrix.m; x++)
+    // {
+    //     for (size_t y = 0; y < matrix.n; y++)
+    //     {
+    //         out << matrix(x, y) << " ";
+    //     }
+    //     out << std::endl;
+    // };
 
     return out;
 }

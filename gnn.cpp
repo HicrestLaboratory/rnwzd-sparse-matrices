@@ -21,6 +21,8 @@ double MSE_loss(const MatrixD &Y, const MatrixD &Y_star)
 }
 MatrixD MSE_loss_prime(const MatrixD &Y, const MatrixD &Y_star)
 {
+    assert(Y.m == Y_star.m);
+    assert(Y.n == Y_star.n);
     return 2 * (Y - Y_star) / (Y.m * Y.n);
 }
 

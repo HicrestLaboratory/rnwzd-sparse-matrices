@@ -13,7 +13,12 @@ class Matrix;
 class MatrixD;
 class MatrixCOO;
 
-typedef std::vector<std::vector<std::pair<size_t, double>>> EdgeList;
+typedef std::vector<std::vector<std::pair<size_t, double>>> AdjList;
+typedef std::vector<std::tuple<size_t, size_t, double>> EdgeList;
+
+MatrixCOO mcoo_from_el_file(std::string filename,
+                      bool weighted = true,
+                      bool directed = true);
 
 class Matrix
 { // TODO
@@ -40,7 +45,7 @@ public:
     MatrixD(size_t m, size_t n, std::function<double(size_t, size_t)> generator);
     MatrixD(const std::vector<std::vector<double>> &vv);
     MatrixD(const MatrixCOO &A);
-    MatrixD(const EdgeList &EL);
+    MatrixD(const AdjList &AL);
     ~MatrixD();
 
     friend class MatrixCOO;
@@ -84,7 +89,7 @@ public:
     MatrixCOO(size_t m, size_t n, std::function<double(size_t, size_t)> generator);
     MatrixCOO(const std::vector<std::vector<double>> &vv);
     MatrixCOO(const MatrixD &A);
-    MatrixCOO(const EdgeList &EL);
+    MatrixCOO(const AdjList &AL, bool directed = true);
     ~MatrixCOO();
 
     friend class MatrixD;

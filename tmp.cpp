@@ -6,12 +6,14 @@
 #include <map>
 #include <utility>
 #include <numeric>
+#include <random>
 
 #include "matrix.hpp"
 
 class MatrixCSR : public Matrix
 {
-private:
+public: // TODO !!!!
+//private 
     std::vector<size_t> valperrow{}; //{0, 2, 4, 6};
     std::vector<size_t> cols{};      //{0, 1, 0, 1, 0, 1};
     std::vector<double> values{};    //{1, 2, 3, 4, 5, 6};
@@ -47,7 +49,7 @@ public:
         assert(A.n == B.m);
         MatrixCOO C{A.m, B.n};
         size_t s{0};
-        for (size_t i{0}; i < A.m ; ++i)
+        for (size_t i{0}; i < A.m; ++i)
         {
             for (size_t h{0}; h < A.valperrow[i + 1] - A.valperrow[i]; ++h)
             {
@@ -61,32 +63,6 @@ public:
 
         return MatrixCSR(C);
     }
-    // MatrixCSR operator*(const MatrixD &B)
-    // {
-    //     assert(n == B.m);
-    //     MatrixCSR C{m, B.n};
-    //     size_t s{0};
-    //     double C_ik{};
-    //     for (size_t i{0}; i < valperrow.size(); ++i)
-    //     {
-    //         C.valperrow.push_back(0);
-    //         for (size_t h{0}; h < valperrow[i]; ++h)
-    //         {
-    //             C_ik = 0;
-    //             auto j = cols[s];
-    //             auto A_ij = values[s];
-    //             for (int k = 0; k < B.n; ++k)
-    //                 C_ik += A_ij * B(j, k);
-
-    //             C.valperrow[i] += 1;
-    //             C.cols.push_back(k);
-    //             C.values.push_back(C_ik);
-    //             s++;
-    //         }
-    //     }
-
-    //     return C;
-    // }
     friend std::ostream &operator<<(std::ostream &out, const MatrixCSR &A)
     {
         size_t s{0};
@@ -103,39 +79,28 @@ public:
 
         return out;
     }
+
 };
 
-// #include <fstream>
-// MatrixCOO MatrixCOOFromFile(std::string file_name)
-// {
-//     std::ifstream file(file_name);
-
-//     if (!file)
-//     {
-//         std::cerr << "Could not open the file " << file_name << ".";
-//         exit(EXIT_FAILURE);
-//     }
-
-//     std::vector<std::string> lines;
-//     std::string line;
-//     std::getline(file, line);
-//     // TODO split !!!
-
-//     while (std::getline(file, line))
-//         lines.push_back(line);
-// }
 int main()
 {
+    const double p = 0.3; // prob of nonzero entry
+    const size_t N = 1 << 2;
 
-    MatrixCOO d(2, 2);
-    // d(0, 0) = 0;
-    d(0, 1) = 1;
-    // d(1, 1) = 0;
-    d(1, 0) = 1;
-    std::cout << (d) << std::endl;
-    std::cout << MatrixCSR(d) << std::endl;
-    // 2 1
-    // 4 3
-    // 6 5
+    std::random_device seed;
+    std::mt19937 rand_gen(seed());
+
+    std::uniform_real_distribution Unif(0.0, 1.0);
+    auto sp_gen = [&](auto i, auto j)
+    { return (Unif(rand_gen) < p) ? 1 : 0; };
+    auto A{MatrixCSR(MatrixCOO(N, N, sp_gen))};
+
+    std::uniform_int_distribution UnifInt(0, 10);
+    auto int_gen = [&](auto i, auto j)
+    { return UnifInt(rand_gen); };
+    auto v{MatrixD{N, 1, int_gen}};
+    ///////////////////////////////////////////////
+
+    
     return 0;
 }
