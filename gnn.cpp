@@ -25,6 +25,26 @@ MatrixD MSE_loss_prime(const MatrixD &Y, const MatrixD &Y_star)
     assert(Y.n == Y_star.n);
     return 2 * (Y - Y_star) / (Y.m * Y.n);
 }
+double CE_loss(const MatrixD &output, const MatrixD &target)
+{
+    // TODO std parallel
+    assert(output.m == target.m == 1); // TODO
+    assert(output.n == target.n);
+    double sum{0};
+    for (size_t j{}; j < target.n; ++j)
+    {
+        sum += -target(0,j)*std::log(output(0,j));
+    }
+
+    return sum;
+}
+MatrixD CE_loss_prime(const MatrixD &output, const MatrixD &target){
+    // TODO std parallel
+    assert(output.m == target.m == 1); // TODO
+    assert(output.n == target.n);
+    return -ewdiv(target,output);
+
+}
 
 Layer::Layer()
     : m_input{0, 0}, m_output{0, 0} {};
@@ -57,18 +77,18 @@ MatrixD GNNLayer::backward_propagation(const MatrixD &output_error, double learn
 MatrixD GNNLayer::W() { return m_W; }
 MatrixD GNNLayer::B() { return m_B; }
 
-ReLULayer::ReLULayer()
+ActLayer::ActLayer()
 {
 }
-MatrixD ReLULayer::forward_propagation(const MatrixD &input, const MatrixCOO &A)
+MatrixD ActLayer::forward_propagation(const MatrixD &input, const MatrixCOO &A)
 {
     m_input = input;
-    m_output = relu(input);
+    m_output = act(input);
     return m_output;
 }
-MatrixD ReLULayer::backward_propagation(const MatrixD &output_error, double learning_rate)
+MatrixD ActLayer::backward_propagation(const MatrixD &output_error, double learning_rate)
 {
-    return ewprod(output_error, relu_prime(m_input));
+    return ewprod(output_error, act_prime(m_input));
 }
 
 Network::Network()
@@ -108,9 +128,9 @@ void Network::fit(std::vector<MatrixD> xs,
         for (size_t j{}; j < n_samples; ++j)
         {
             output = forward(xs[j], As[j]);
-            loss_value += m_loss(ys[j], output);
+            loss_value += m_loss( output,ys[j]);
 
-            error = m_loss_prime(ys[j], output);
+            error = m_loss_prime(output,ys[j]);
             for (auto it = m_layerps.rbegin(); it != m_layerps.rend(); ++it)
             {
                 auto layerp = *it;

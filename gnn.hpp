@@ -6,6 +6,9 @@
 double MSE_loss(const MatrixD &A, const MatrixD &B);
 MatrixD MSE_loss_prime(const MatrixD &A, const MatrixD &B);
 
+double CE_loss(const MatrixD &output, const MatrixD &target);
+MatrixD CE_loss_prime(const MatrixD &output, const MatrixD &target);
+
 class Layer
 {
 protected:
@@ -33,10 +36,10 @@ public:
     MatrixD B();
 };
 
-class ReLULayer : public Layer
+class ActLayer : public Layer
 {
 public:
-    ReLULayer();
+    ActLayer();
     MatrixD forward_propagation(const MatrixD &input, const MatrixCOO &A);
     MatrixD backward_propagation(const MatrixD &output_error, double learning_rate);
 };
@@ -45,8 +48,8 @@ class Network
 {
 private:
     std::vector<Layer *> m_layerps{};
-    std::function<double(const MatrixD &, const MatrixD &)> m_loss{MSE_loss};
-    std::function<MatrixD(const MatrixD &, const MatrixD &)> m_loss_prime{MSE_loss_prime};
+    std::function<double(const MatrixD &, const MatrixD &)> m_loss{CE_loss};
+    std::function<MatrixD(const MatrixD &, const MatrixD &)> m_loss_prime{CE_loss_prime};
 
 public:
     Network();

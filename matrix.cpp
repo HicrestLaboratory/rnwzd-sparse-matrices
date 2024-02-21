@@ -3,22 +3,25 @@
 #include <cassert>
 #include <vector>
 #include <fstream>
+#include <cmath>
 
 #include "matrix.hpp"
 
-constexpr double relu(double x)
+constexpr double act(double x)
 {
+    return 1 / (1 + std::exp(-x));
     return (x > 0) ? x : 0;
 }
-constexpr double relu_prime(double x)
+constexpr double act_prime(double x)
 {
+    return std::exp(-x) / std::pow(1 + std::exp(-x), 2);
     return (x > 0) ? 1 : 0;
 }
 //////////////////////////////////////
 
 MatrixCOO mcoo_from_el_file(std::string filename,
-                      bool weighted,
-                      bool directed)
+                            bool weighted,
+                            bool directed)
 {
     std::ifstream file(filename);
     if (!file.is_open())
@@ -57,8 +60,8 @@ MatrixCOO mcoo_from_el_file(std::string filename,
     }
     file.close();
 
-    size_t N = max_idx +1;
-    MatrixCOO A{N,N};
+    size_t N = max_idx + 1;
+    MatrixCOO A{N, N};
     for (const auto &[i, j, w] : edge_list)
     {
         A(i, j) = w;
@@ -250,6 +253,20 @@ MatrixD ewprod(const MatrixD &A, const MatrixD &B)
     }
     return C;
 }
+MatrixD ewdiv(const MatrixD &A, const MatrixD &B)
+{
+    assert(A.m == B.m);
+    assert(A.n == B.n);
+    MatrixD C{A.m, B.n, 0};
+    for (size_t i = 0; i < A.m; i++)
+    {
+        for (size_t j = 0; j < A.n; j++)
+        {
+            C(i, j) = A(i, j) / B(i, j);
+        }
+    }
+    return C;
+}
 std::ostream &operator<<(std::ostream &out, const MatrixD &matrix)
 {
     for (size_t i = 0; i < matrix.m; i++)
@@ -262,20 +279,20 @@ std::ostream &operator<<(std::ostream &out, const MatrixD &matrix)
     };
     return out;
 }
-MatrixD relu(const MatrixD &A)
+MatrixD act(const MatrixD &A)
 {
     MatrixD C{A.m, A.n};
     std::transform(
         A.data.begin(), A.data.end(), C.data.begin(), [](const auto &e)
-        { return relu(e); });
+        { return act(e); });
     return C;
 }
-MatrixD relu_prime(const MatrixD &A)
+MatrixD act_prime(const MatrixD &A)
 {
     MatrixD C{A.m, A.n};
     std::transform(
         A.data.begin(), A.data.end(), C.data.begin(), [](const auto &e)
-        { return relu_prime(e); });
+        { return act_prime(e); });
     return C;
 }
 double MatrixD::outdegree(size_t v)
@@ -591,28 +608,28 @@ std::ostream &operator<<(std::ostream &out, const MatrixCOO &matrix)
 
     return out;
 }
-MatrixCOO relu(const MatrixCOO &A)
+MatrixCOO act(const MatrixCOO &A)
 {
     MatrixCOO C{A.m, A.n};
     std::for_each(A.data.begin(), A.data.end(), [&C](const auto &e)
                   {
             auto [i,j] {e.first};
             auto A_ij { e.second};
-            auto C_ij = relu(A_ij); 
+            auto C_ij = act(A_ij); 
             if ( C_ij != 0)
                 {C.data[{i,j}] = C_ij;}
             else
                 {C.data.erase({i,j});} });
     return C;
 }
-MatrixCOO relu_prime(const MatrixCOO &A)
+MatrixCOO act_prime(const MatrixCOO &A)
 {
     MatrixCOO C{A.m, A.n};
     std::for_each(A.data.begin(), A.data.end(), [&C](const auto &e)
                   {
             auto [i,j] {e.first};
             auto A_ij { e.second};
-            auto C_ij = relu_prime(A_ij); 
+            auto C_ij = act_prime(A_ij); 
             if ( C_ij != 0)
                 {C.data[{i,j}] = C_ij;}
             else
@@ -653,35 +670,38 @@ MatrixCOO MatrixCOO::t()
             T(j,i) = A_ij; });
     return T;
 }
-void MatrixCOO::add_row(std::vector<double> row){
-    if (m==0 && n==0){
-        n= row.size();
+void MatrixCOO::add_row(std::vector<double> row)
+{
+    if (m == 0 && n == 0)
+    {
+        n = row.size();
     }
-    assert(n==row.size());
-    m+=1;
-    for (size_t j {0};  j<row.size(); ++j){
-            
-            if (row[j]!= 0.0)
-            {
-                data[{m-1, j}] = row[j];
-            }
-        
+    assert(n == row.size());
+    m += 1;
+    for (size_t j{0}; j < row.size(); ++j)
+    {
+
+        if (row[j] != 0.0)
+        {
+            data[{m - 1, j}] = row[j];
+        }
     }
 }
 
-void MatrixCOO::add_col(std::vector<double> col){
-    if (m==0 && n==0){
-        n= col.size();
+void MatrixCOO::add_col(std::vector<double> col)
+{
+    if (m == 0 && n == 0)
+    {
+        n = col.size();
     }
-    assert(m==col.size());
-    n+=1;
-    for (size_t i {0};  i<col.size(); ++i){
-            
-            if (col[i]!= 0.0)
-            {
-                data[{i, n-1}] = col[i];
-            }
-        
+    assert(m == col.size());
+    n += 1;
+    for (size_t i{0}; i < col.size(); ++i)
+    {
+
+        if (col[i] != 0.0)
+        {
+            data[{i, n - 1}] = col[i];
+        }
     }
 }
-

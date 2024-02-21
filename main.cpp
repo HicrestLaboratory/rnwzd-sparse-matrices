@@ -19,8 +19,8 @@ int main()
     //
 
     // GNNLayer gnn1{n_h_in, n_h_out, normal_gen};
-    // ReLULayer relu1{};
-    // Network net1{{&gnn1, &relu1}};
+    // ActLayer act1{};
+    // Network net1{{&gnn1, &act1}};
 
     // std::vector<MatrixD> xs{};
     // std::vector<MatrixCOO> As{};
@@ -35,8 +35,8 @@ int main()
     // }
 
     // GNNLayer gnn2{n_h_in, n_h_out, normal_gen};
-    // ReLULayer relu2{};
-    // Network net2{{&gnn2, &relu2}};
+    // ActLayer act2{};
+    // Network net2{{&gnn2, &act2}};
 
     // net2.fit(xs, As, ys, n_epochs, learning_rate);
 
@@ -61,12 +61,13 @@ int main()
     y = y.t(); // TODO
 
     const auto n_samples{1};
-    const auto n_v{x.n};     // number of vertices
-    const auto n_h_in{x.m};  // dimension of input latent vector
+    const auto n_v{x.n};    // number of vertices
+    const auto n_h_in{x.m}; // dimension of input latent vector
+    const auto n_h_hidden{4};
     const auto n_h_out{y.m}; // dimension of output latent vector
 
-    const auto n_epochs{100};
-    const double learning_rate{-0.01}; // TODO
+    const auto n_epochs{1000};
+    const double learning_rate{0.1}; // TODO
 
     std::random_device seed;
     std::mt19937 rand_gen(seed());
@@ -74,14 +75,23 @@ int main()
     auto normal_gen = [&](auto i, auto j)
     { return Normal(rand_gen); };
 
-    GNNLayer gnn{n_h_in, n_h_out, normal_gen};
-    ReLULayer relu{};
-    Network net{{&gnn, &relu}};
+    GNNLayer gnni{n_h_in, n_h_hidden, normal_gen};
+    ActLayer acti{};
+
+    // GNNLayer gnn1{n_h_hidden, n_h_hidden, normal_gen};
+    //ActLayer act1{};
+
+    GNNLayer gnnf{n_h_hidden, n_h_out, normal_gen};
+    ActLayer actf{};
+    Network net{{&gnni, &acti,
+    //   &gnn1, &act1,
+      &gnnf, &actf}};
 
     net.fit({x}, {A}, {y}, // TODO
-             n_epochs, learning_rate);
+            n_epochs, learning_rate);
 
-    std::cout << net.forward(x,A);
+    std::cout << net.forward(x, A);
+    std::cout << MatrixD{y};
 
     return 0;
 }
