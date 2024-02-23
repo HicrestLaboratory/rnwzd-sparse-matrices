@@ -28,22 +28,24 @@ MatrixD MSE_loss_prime(const MatrixD &Y, const MatrixD &Y_star)
 double CE_loss(const MatrixD &output, const MatrixD &target)
 {
     // TODO std parallel
-    assert(output.m == target.m == 1); // TODO
+    assert(output.m == target.m); // TODO
     assert(output.n == target.n);
-    double sum{0};
+    double sum{0}, t, o;
     for (size_t j{}; j < target.n; ++j)
     {
-        sum += -target(0,j)*std::log(output(0,j));
+        t = target(0, j);
+        o = output(0, j);
+        sum += -t * std::log(o);
     }
 
     return sum;
 }
-MatrixD CE_loss_prime(const MatrixD &output, const MatrixD &target){
+MatrixD CE_loss_prime(const MatrixD &output, const MatrixD &target)
+{
     // TODO std parallel
-    assert(output.m == target.m == 1); // TODO
+    assert(output.m == target.m); // TODO
     assert(output.n == target.n);
-    return -ewdiv(target,output);
-
+    return -ewdiv(target, output);
 }
 
 Layer::Layer()
@@ -52,22 +54,27 @@ Layer::Layer()
 GNNLayer::GNNLayer(size_t input_size, size_t output_size, std::function<double(size_t, size_t)> generator)
     : m_input_size{input_size},
       m_output_size{output_size},
-      m_W{output_size, input_size, generator},
-      m_B{output_size, input_size, generator}
+      m_W{input_size, output_size, generator},
+      m_B{input_size, output_size, generator}
 {
 }
 MatrixD GNNLayer::forward_propagation(const MatrixD &input, const MatrixCOO &A)
 {
     m_input = input;
     m_A = A;
-    m_output = m_W * input * A + m_B * input;
+    //m_output = m_W * input * A + m_B * input;
+    m_output = A * input * m_W +  input*m_B;
     return m_output;
 }
 MatrixD GNNLayer::backward_propagation(const MatrixD &output_error, double learning_rate)
 {
-    MatrixD W_error{output_error * m_A.t() * m_input.t()};
-    MatrixD B_error{output_error * m_input.t()};
-    MatrixD input_error{m_W.t() * output_error * m_A.t() + m_B.t() * output_error};
+    // MatrixD W_error{output_error * m_A.t() * m_input.t()};
+    // MatrixD B_error{output_error * m_input.t()};
+    // MatrixD input_error{m_W.t() * output_error * m_A.t() + m_B.t() * output_error};
+
+    MatrixD W_error{m_input.t() *m_A* output_error };
+    MatrixD B_error{m_input.t()* output_error };
+    MatrixD input_error{m_A * output_error * m_W.t() +  output_error*m_B.t()};
 
     m_W -= learning_rate * W_error;
     m_B -= learning_rate * B_error;
@@ -128,9 +135,9 @@ void Network::fit(std::vector<MatrixD> xs,
         for (size_t j{}; j < n_samples; ++j)
         {
             output = forward(xs[j], As[j]);
-            loss_value += m_loss( output,ys[j]);
+            loss_value += m_loss(output, ys[j]);
 
-            error = m_loss_prime(output,ys[j]);
+            error = m_loss_prime(output, ys[j]);
             for (auto it = m_layerps.rbegin(); it != m_layerps.rend(); ++it)
             {
                 auto layerp = *it;

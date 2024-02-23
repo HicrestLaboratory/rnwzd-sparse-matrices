@@ -16,82 +16,62 @@
 int main()
 {
 
-    //
+  std::string filename = "data/dummy.edgelist";
+  bool weighted = false;
+  bool directed = false;
+  auto A = mcoo_from_el_file(filename, weighted, directed);
 
-    // GNNLayer gnn1{n_h_in, n_h_out, normal_gen};
-    // ActLayer act1{};
-    // Network net1{{&gnn1, &act1}};
+  // std::cout << A;
 
-    // std::vector<MatrixD> xs{};
-    // std::vector<MatrixCOO> As{};
-    // std::vector<MatrixD> ys{};
-    // for (size_t i{}; i < n_samples; ++i)
-    // {
-    //     MatrixD x{n_h_in, n_v, normal_gen};
-    //     MatrixCOO A{n_v, n_v, normal_gen};
-    //     xs.push_back(x);
-    //     As.push_back(A);
-    //     ys.push_back(net1.forward(x, A));
-    // }
+  io::CSVReader<5> in("data/dummy.csv");
+  in.read_header(io::ignore_extra_column, "node", "member", "instructor", "administrator", "community");
+  int node;
+  double member, instructor, administrator, community;
+  MatrixCOO x{0, 0}, y{0, 0};
+  while (in.read_row(node, member, instructor, administrator, community))
+  {
+    x.add_row({member, instructor, administrator});
+    y.add_row({community, 1 - community});
+  }
+  // x = x.t(); // TODO
+  // y = y.t(); // TODO
 
-    // GNNLayer gnn2{n_h_in, n_h_out, normal_gen};
-    // ActLayer act2{};
-    // Network net2{{&gnn2, &act2}};
+  const auto n_samples{1};
+  const auto n_v{x.m};    // number of vertices
+  const auto n_h_in{x.n}; // dimension of input latent vector
+  const auto n_h_hidden{4};
+  const auto n_h_out{y.n}; // dimension of output latent vector
 
-    // net2.fit(xs, As, ys, n_epochs, learning_rate);
+  const auto n_epochs{10000};
+  const double learning_rate{0.1}; // TODO
 
-    std::string filename = "data/karate.edgelist";
-    bool weighted = false;
-    bool directed = false;
-    auto A = mcoo_from_el_file(filename, weighted, directed);
+  std::random_device seed;
+  std::mt19937 rand_gen(seed());
+  std::normal_distribution Normal(0.0, 2.0);
+  auto normal_gen = [&](auto i, auto j)
+  { return Normal(rand_gen); };
 
-    // std::cout << A;
+  // GNNLayer gnni{n_h_in, n_h_hidden, normal_gen};
+  // ActLayer acti{};
 
-    io::CSVReader<5> in("data/karate.csv");
-    in.read_header(io::ignore_extra_column, "node", "member", "instructor", "administrator", "community");
-    int node;
-    double member, instructor, administrator, community;
-    MatrixCOO x{0, 0}, y{0, 0};
-    while (in.read_row(node, member, instructor, administrator, community))
-    {
-        x.add_row({member, instructor, administrator});
-        y.add_row({community});
-    }
-    x = x.t(); // TODO
-    y = y.t(); // TODO
+  // // GNNLayer gnn1{n_h_hidden, n_h_hidden, normal_gen};
+  // //ActLayer act1{};
 
-    const auto n_samples{1};
-    const auto n_v{x.n};    // number of vertices
-    const auto n_h_in{x.m}; // dimension of input latent vector
-    const auto n_h_hidden{4};
-    const auto n_h_out{y.m}; // dimension of output latent vector
+  // GNNLayer gnnf{n_h_hidden, n_h_out, normal_gen};
+  // ActLayer actf{};
+  // Network net{{&gnni, &acti,
+  // //   &gnn1, &act1,
+  //   &gnnf, &actf}};
 
-    const auto n_epochs{1000};
-    const double learning_rate{0.1}; // TODO
+  GNNLayer gnn{n_h_in, n_h_out, normal_gen};
+  ActLayer act{};
+  Network net{{&gnn, &act}};
 
-    std::random_device seed;
-    std::mt19937 rand_gen(seed());
-    std::normal_distribution Normal(0.0, 2.0);
-    auto normal_gen = [&](auto i, auto j)
-    { return Normal(rand_gen); };
+  net.fit({x}, {A}, {y}, // TODO
+          n_epochs, learning_rate);
 
-    GNNLayer gnni{n_h_in, n_h_hidden, normal_gen};
-    ActLayer acti{};
+  std::cout << net.forward(x, A);
+  std::cout << MatrixD{y};
 
-    // GNNLayer gnn1{n_h_hidden, n_h_hidden, normal_gen};
-    //ActLayer act1{};
-
-    GNNLayer gnnf{n_h_hidden, n_h_out, normal_gen};
-    ActLayer actf{};
-    Network net{{&gnni, &acti,
-    //   &gnn1, &act1,
-      &gnnf, &actf}};
-
-    net.fit({x}, {A}, {y}, // TODO
-            n_epochs, learning_rate);
-
-    std::cout << net.forward(x, A);
-    std::cout << MatrixD{y};
-
-    return 0;
+  return 0;
 }
