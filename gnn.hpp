@@ -6,8 +6,8 @@
 double MSE_loss(const MatrixD &A, const MatrixD &B);
 MatrixD MSE_loss_prime(const MatrixD &A, const MatrixD &B);
 
-double CE_loss(const MatrixD &output, const MatrixD &target);
-MatrixD CE_loss_prime(const MatrixD &output, const MatrixD &target);
+double BCE_loss(const MatrixD &output, const MatrixD &target);
+MatrixD BCE_loss_prime(const MatrixD &output, const MatrixD &target);
 
 class Layer
 {
@@ -48,8 +48,8 @@ class Network
 {
 private:
     std::vector<Layer *> m_layerps{};
-    std::function<double(const MatrixD &, const MatrixD &)> m_loss{CE_loss};
-    std::function<MatrixD(const MatrixD &, const MatrixD &)> m_loss_prime{CE_loss_prime};
+    std::function<double(const MatrixD &, const MatrixD &)> m_loss{BCE_loss};
+    std::function<MatrixD(const MatrixD &, const MatrixD &)> m_loss_prime{BCE_loss_prime};
 
 public:
     Network();
