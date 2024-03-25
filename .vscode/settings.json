@@ -72,5 +72,20 @@
         "variant": "cpp",
         "csignal": "cpp"
     },
-    "C_Cpp.default.compilerPath": "/usr/bin/gcc"
+    "C_Cpp.default.compilerPath": "/usr/bin/gcc",
+    "spellright.language": [
+        "en",
+        "it"
+    ],
+    "spellright.documentTypes": [
+        "markdown",
+        "latex",
+        "plaintext",
+        "fountain"
+    ],
+    "spellright.parserByClass": {
+        "fountain": {
+            "parser": "plain"
+        }
+    }
 }

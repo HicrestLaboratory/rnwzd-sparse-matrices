@@ -1,2 +1,2 @@
-main
-tmp
+build/*
+bin/*
