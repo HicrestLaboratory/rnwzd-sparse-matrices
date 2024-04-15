@@ -1,2 +1,2 @@
-g++ -std=c++20 main.cpp matrix.cpp gnn.cpp  -I. -g -o main -lpthread
+g++ -std=c++20 main.cpp matrix.cpp gnn.cpp  -I. -g -o bin/main -lpthread
 

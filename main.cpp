@@ -72,9 +72,9 @@ int main()
 
   auto pred = net.forward(x, A);
   auto gt = MatrixD{y};
-  std::cout << pred;
-  std::cout << gt;
-  std::cout << BCE_loss(pred, gt)<<std::endl;
+  // std::cout << pred;
+  // std::cout << gt;
+  //std::cout << BCE_loss(pred, gt)<<std::endl;
 
   double sum {0};
   for (size_t i{}; i < gt.m; ++i)
@@ -86,6 +86,6 @@ int main()
   }
   double acc = sum/(gt.m*gt.n);
 
-  std::cout << acc << std::endl;
+  std::cout <<"Accuracy:" << acc << std::endl;
   return 0;
 }
