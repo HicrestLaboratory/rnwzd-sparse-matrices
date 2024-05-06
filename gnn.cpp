@@ -28,37 +28,36 @@ MatrixD MSE_loss_prime(const MatrixD &Y, const MatrixD &Y_star)
 double BCE_loss(const MatrixD &output, const MatrixD &target)
 {
     // TODO std parallel
-    assert(output.n ==1 && target.n ==1); // TODO
+    assert(output.n == 1 && target.n == 1); // TODO
     assert(output.m == target.m);
     double sum{0}, t, o;
-    size_t i=0;
-        for (size_t j{}; j < target.n; ++j)
-        {
-            t = target(i, j);
-            o = output(i, j);
-            sum += -t * std::log(o) -(1-t)*std::log(1-o);
-        }
-
+    size_t i = 0;
+    for (size_t j{}; j < target.n; ++j)
+    {
+        t = target(i, j);
+        o = output(i, j);
+        sum += -t * std::log(o) - (1 - t) * std::log(1 - o);
+    }
 
     return sum;
 }
 MatrixD BCE_loss_prime(const MatrixD &output, const MatrixD &target)
 {
     // TODO std parallel
-    assert(output.n ==1 && target.n ==1); // TODO
+    assert(output.n == 1 && target.n == 1); // TODO
     assert(output.m == target.m);
-    
-    //TODO!!!!!!
+
+    // TODO!!!!!!
     MatrixD C{target.m, target.n, 0};
     for (size_t i = 0; i < target.m; i++)
     {
         for (size_t j = 0; j < target.n; j++)
         {
-            C(i, j) = - target(i, j) / output(i, j) + (1-target(i,j))/(1-output(i,j));
+            C(i, j) = -target(i, j) / output(i, j) + (1 - target(i, j)) / (1 - output(i, j));
         }
     }
     return C;
-    //return -ewdiv(target, output)+ewdiv(1-target,1-output);
+    // return -ewdiv(target, output)+ewdiv(1-target,1-output);
 }
 
 Layer::Layer()
@@ -111,11 +110,15 @@ MatrixD ActLayer::backward_propagation(const MatrixD &output_error, double learn
     return ewprod(output_error, act_prime(m_input));
 }
 
-Network::Network()
+Network::Network(std::function<double(const MatrixD &, const MatrixD &)> loss,
+                 std::function<MatrixD(const MatrixD &, const MatrixD &)> loss_prime)
+    : m_loss{loss}, m_loss_prime{loss_prime}
 {
 }
-Network::Network(std::vector<Layer *> layerps)
-    : m_layerps{layerps}
+Network::Network(std::vector<Layer *> layerps,
+                 std::function<double(const MatrixD &, const MatrixD &)> loss,
+                 std::function<MatrixD(const MatrixD &, const MatrixD &)> loss_prime)
+    : m_layerps{layerps}, m_loss{loss}, m_loss_prime{loss_prime}
 {
 }
 void Network::add_layerp(Layer *layer)

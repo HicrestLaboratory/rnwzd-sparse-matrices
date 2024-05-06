@@ -52,8 +52,12 @@ private:
     std::function<MatrixD(const MatrixD &, const MatrixD &)> m_loss_prime{BCE_loss_prime};
 
 public:
-    Network();
-    Network(std::vector<Layer *> layerps);
+    Network(
+        std::function<double(const MatrixD &, const MatrixD &)> loss,
+        std::function<MatrixD(const MatrixD &, const MatrixD &)> loss_prime);
+    Network(std::vector<Layer *> layerps,
+            std::function<double(const MatrixD &, const MatrixD &)> loss,
+            std::function<MatrixD(const MatrixD &, const MatrixD &)> loss_prime);
     void add_layerp(Layer *layer);
     MatrixD forward(MatrixD input, const MatrixCOO &A);
     void fit(std::vector<MatrixD> xs,

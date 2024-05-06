@@ -7,18 +7,21 @@
 
 #include "matrix.hpp"
 
+// Activation function
 constexpr double act(double x)
 {
     return 1 / (1 + std::exp(-x));
-    return (x > 0) ? x : 0;
+    //return (x > 0) ? x : 0;
 }
+// Derivative of activation function
 constexpr double act_prime(double x)
 {
     return std::exp(-x) / std::pow(1 + std::exp(-x), 2);
-    return (x > 0) ? 1 : 0;
+    //return (x > 0) ? 1 : 0;
 }
 //////////////////////////////////////
 
+//Reads MatrixCOO from edgelist file
 MatrixCOO mcoo_from_el_file(std::string filename,
                             bool weighted,
                             bool directed)
@@ -239,6 +242,7 @@ MatrixD operator*(const MatrixD &A, const MatrixD &B)
     }
     return C;
 }
+// elementwise product
 MatrixD ewprod(const MatrixD &A, const MatrixD &B)
 {
     assert(A.m == B.m);
@@ -253,6 +257,7 @@ MatrixD ewprod(const MatrixD &A, const MatrixD &B)
     }
     return C;
 }
+//elementwise division
 MatrixD ewdiv(const MatrixD &A, const MatrixD &B)
 {
     assert(A.m == B.m);
